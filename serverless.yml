@@ -7,6 +7,7 @@ custom:
     includeModules: true
 
 plugins:
+  - serverless-step-functions
   - serverless-webpack
 
 provider:
@@ -15,3 +16,24 @@ provider:
   runtime: nodejs12.x
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+
+functions:
+  hello:
+    handler: functions/hello.handler
+
+stepFunctions:
+  stateMachines:
+    hellostepfunc1:
+      name: myStateMachine
+      tracingConfig:
+        enabled: true
+      definition:
+        Comment: "A Hello World example of the Amazon States Language using an AWS Lambda Function"
+        StartAt: HelloWorld1
+        States:
+          HelloWorld1:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [hello, Arn]
+            End: true
+  validate: true
