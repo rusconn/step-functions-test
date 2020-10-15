@@ -20,6 +20,8 @@ provider:
 functions:
   hello:
     handler: functions/hello.handler
+  echo:
+    handler: functions/echo.handler
 
 stepFunctions:
   stateMachines:
@@ -35,5 +37,10 @@ stepFunctions:
             Type: Task
             Resource:
               Fn::GetAtt: [hello, Arn]
+            Next: echo
+          echo:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [echo, Arn]
             End: true
   validate: true
