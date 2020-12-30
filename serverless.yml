@@ -5,6 +5,7 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+  stage: ${opt:stage, self:provider.stage}
 
 plugins:
   - serverless-step-functions
@@ -12,6 +13,7 @@ plugins:
 
 provider:
   name: aws
+  stage: dev
   region: ap-northeast-1
   runtime: nodejs12.x
   environment:
@@ -22,11 +24,25 @@ functions:
     handler: functions/hello.handler
   echo:
     handler: functions/echo.handler
+  entry:
+    handler: functions/entry.handler
+  mapTask:
+    handler: functions/mapTask.handler
+  notify:
+    handler: functions/notify.handler
+
+resources:
+  Resources:
+    myMapStateMachineLogs:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/stepfunctions/myMapStateMachine-${self:custom.stage}-Logs
 
 stepFunctions:
+  validate: true
   stateMachines:
     hellostepfunc1:
-      name: myStateMachine
+      name: myStateMachine-${self:custom.stage}
       tracingConfig:
         enabled: true
       definition:
@@ -43,4 +59,40 @@ stepFunctions:
             Resource:
               Fn::GetAtt: [echo, Arn]
             End: true
-  validate: true
+    mapStateMachine:
+      name: myMapStateMachine-${self:custom.stage}
+      tracingConfig:
+        enabled: true
+      loggingConfig:
+        level: ALL
+        includeExecutionData: true
+        destinations:
+          - Fn::GetAtt: [myMapStateMachineLogs, Arn]
+      definition:
+        Comment: "map test"
+        StartAt: FirstState
+        States:
+          FirstState:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [entry, Arn]
+            Next: mapped_task
+          mapped_task:
+            Type: Map
+            InputPath: $.users
+            MaxConcurrency: 2
+            Iterator:
+              StartAt: FirstMapTask
+              States:
+                FirstMapTask:
+                  Type: Task
+                  Resource:
+                    Fn::GetAtt: [mapTask, Arn]
+                  End: true
+            Next: NotifyState
+          NotifyState:
+            Type: Task
+            InputPath: $
+            Resource:
+              Fn::GetAtt: [notify, Arn]
+            End: true
