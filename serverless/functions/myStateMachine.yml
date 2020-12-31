@@ -1,0 +1,4 @@
+hello:
+  handler: src/functions/myStateMachine/hello.handler
+echo:
+  handler: src/functions/myStateMachine/echo.handler

@@ -1,5 +1,5 @@
 service:
-  name: step-functions-test
+  name: sfn-test
 
 custom:
   webpack:
@@ -20,79 +20,15 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
 
 functions:
-  hello:
-    handler: functions/hello.handler
-  echo:
-    handler: functions/echo.handler
-  entry:
-    handler: functions/entry.handler
-  mapTask:
-    handler: functions/mapTask.handler
-  notify:
-    handler: functions/notify.handler
+  - ${file(./serverless/functions/myStateMachine.yml)}
+  - ${file(./serverless/functions/mapStateMachine.yml)}
 
 resources:
   Resources:
-    myMapStateMachineLogs:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/stepfunctions/myMapStateMachine-${self:custom.stage}-Logs
+    mapStateMachineLogGroup: ${file(./serverless/logGroups/mapStateMachine.yml)}
 
 stepFunctions:
   validate: true
   stateMachines:
-    hellostepfunc1:
-      name: myStateMachine-${self:custom.stage}
-      tracingConfig:
-        enabled: true
-      definition:
-        Comment: "A Hello World example of the Amazon States Language using an AWS Lambda Function"
-        StartAt: HelloWorld1
-        States:
-          HelloWorld1:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [hello, Arn]
-            Next: echo
-          echo:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [echo, Arn]
-            End: true
-    mapStateMachine:
-      name: myMapStateMachine-${self:custom.stage}
-      tracingConfig:
-        enabled: true
-      loggingConfig:
-        level: ALL
-        includeExecutionData: true
-        destinations:
-          - Fn::GetAtt: [myMapStateMachineLogs, Arn]
-      definition:
-        Comment: "map test"
-        StartAt: FirstState
-        States:
-          FirstState:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [entry, Arn]
-            Next: mapped_task
-          mapped_task:
-            Type: Map
-            InputPath: $.users
-            MaxConcurrency: 2
-            Iterator:
-              StartAt: FirstMapTask
-              States:
-                FirstMapTask:
-                  Type: Task
-                  Resource:
-                    Fn::GetAtt: [mapTask, Arn]
-                  End: true
-            Next: NotifyState
-          NotifyState:
-            Type: Task
-            InputPath: $
-            Resource:
-              Fn::GetAtt: [notify, Arn]
-            End: true
+    myStateMachine: ${file(./serverless/stateMachines/myStateMachine.yml)}
+    mapStateMachine: ${file(./serverless/stateMachines/mapStateMachine.yml)}

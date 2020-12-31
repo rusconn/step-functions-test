@@ -1,4 +1,5 @@
-import { Handler, NotifyInput } from "./types";
+import { Handler } from "../types";
+import { NotifyInput } from "./types";
 
 export const handler: Handler<NotifyInput> = async (event, context) => {
   console.log(JSON.stringify({ event }, null, 2));

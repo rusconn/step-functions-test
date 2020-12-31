@@ -1,0 +1,34 @@
+name: mapStateMachine-${self:custom.stage}
+tracingConfig:
+  enabled: true
+loggingConfig:
+  level: ALL
+  includeExecutionData: true
+  destinations:
+    - Fn::GetAtt: [mapStateMachineLogGroup, Arn]
+definition:
+  Comment: "map test"
+  StartAt: First
+  States:
+    First:
+      Type: Task
+      Resource:
+        Fn::GetAtt: [entry, Arn]
+      Next: MapTask
+    MapTask:
+      Type: Map
+      MaxConcurrency: 2
+      Iterator:
+        StartAt: FirstMapTask
+        States:
+          FirstMapTask:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [mapTask, Arn]
+            End: true
+      Next: Notify
+    Notify:
+      Type: Task
+      Resource:
+        Fn::GetAtt: [notify, Arn]
+      End: true

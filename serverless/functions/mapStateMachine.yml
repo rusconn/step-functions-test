@@ -1,0 +1,6 @@
+entry:
+  handler: src/functions/mapStateMachine/entry.handler
+mapTask:
+  handler: src/functions/mapStateMachine/mapTask.handler
+notify:
+  handler: src/functions/mapStateMachine/notify.handler
