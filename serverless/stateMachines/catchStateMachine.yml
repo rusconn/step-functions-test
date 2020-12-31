@@ -1,0 +1,46 @@
+name: catchStateMachine-${self:custom.stage}
+tracingConfig:
+  enabled: true
+loggingConfig:
+  level: ALL
+  includeExecutionData: true
+  destinations:
+    - Fn::GetAtt: [catchStateMachineLogGroup, Arn]
+definition:
+  Comment: "catch test"
+  StartAt: try
+  States:
+    try:
+      Type: Task
+      Resource:
+        Fn::GetAtt: [try, Arn]
+      Retry:
+        - ErrorEquals: ["Lambda.Unknown"]
+          IntervalSeconds: 1
+          MaxAttempts: 2
+          BackoffRate: 2
+      Catch:
+        - ErrorEquals: ["ErrorA"]
+          Next: errorA
+        - ErrorEquals: ["ErrorB"]
+          Next: errorB
+        - ErrorEquals: ["States.ALL"]
+          Next: error
+      End: true
+    errorA:
+      Type: Task
+      Resource:
+        Fn::GetAtt: [handleErrorA, Arn]
+      Next: fail
+    errorB:
+      Type: Task
+      Resource:
+        Fn::GetAtt: [handleErrorB, Arn]
+      Next: fail
+    error:
+      Type: Task
+      Resource:
+        Fn::GetAtt: [handleError, Arn]
+      Next: fail
+    fail:
+      Type: Fail

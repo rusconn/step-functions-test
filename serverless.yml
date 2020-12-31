@@ -11,6 +11,9 @@ plugins:
   - serverless-step-functions
   - serverless-webpack
 
+package:
+  individually: true
+
 provider:
   name: aws
   stage: dev
@@ -22,13 +25,16 @@ provider:
 functions:
   - ${file(./serverless/functions/myStateMachine.yml)}
   - ${file(./serverless/functions/mapStateMachine.yml)}
+  - ${file(./serverless/functions/catchStateMachine.yml)}
 
 resources:
   Resources:
     mapStateMachineLogGroup: ${file(./serverless/logGroups/mapStateMachine.yml)}
+    catchStateMachineLogGroup: ${file(./serverless/logGroups/catchStateMachine.yml)}
 
 stepFunctions:
   validate: true
   stateMachines:
     myStateMachine: ${file(./serverless/stateMachines/myStateMachine.yml)}
     mapStateMachine: ${file(./serverless/stateMachines/mapStateMachine.yml)}
+    catchStateMachine: ${file(./serverless/stateMachines/catchStateMachine.yml)}

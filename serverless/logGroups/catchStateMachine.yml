@@ -1,0 +1,3 @@
+Type: AWS::Logs::LogGroup
+Properties:
+  LogGroupName: /aws/sfn/catchStateMachine-${self:custom.stage}-Logs

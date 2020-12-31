@@ -1,0 +1,8 @@
+try:
+  handler: src/functions/catchStateMachine/try.handler
+handleErrorA:
+  handler: src/functions/catchStateMachine/handleErrorA.handler
+handleErrorB:
+  handler: src/functions/catchStateMachine/handleErrorB.handler
+handleError:
+  handler: src/functions/catchStateMachine/handleError.handler
